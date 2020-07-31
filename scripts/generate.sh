@@ -32,6 +32,7 @@ then
     EC_ROM=$(realpath "$3")
 fi
 
+
 if [ ! -d "models/${MODEL}" ]
 then
     echo "Generating for new model '${MODEL}'"
@@ -58,6 +59,12 @@ coreboot/util/ifdtool/ifdtool -x "${BIOS_IMAGE}"
 mv flashregion_0_flashdescriptor.bin "${MODEL_DIR}/fd.rom"
 mv flashregion_2_intel_me.bin "${MODEL_DIR}/me.rom"
 rm -f flashregion_*.bin
+
+# Get the Video BIOS Table for Intel systems
+if sudo [ -e /sys/kernel/debug/dri/0/i915_vbt ]
+then
+    sudo dd if=/sys/kernel/debug/dri/0/i915_vbt of="${MODEL_DIR}/vbt.rom" status=none
+fi
 
 # XXX: More reliable way to determine if system has an EC?
 DMI_CHASSIS_TYPE=$(cat /sys/class/dmi/id/chassis_type)
